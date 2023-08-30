@@ -13,4 +13,3 @@ app = Flask(__name__)
 def hello_world():
     return render_template("hello.html", name="SSE Fall 2023!")
 
-

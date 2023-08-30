@@ -13,6 +13,7 @@ app = Flask(__name__)
 def hello_world():
     # TODO: change hello world example to echo back the user's name 
     # passed to it as a request parameter
+    return render_template("live_reflected_xss.html", name=request.args.get("name"))
     
 
 
