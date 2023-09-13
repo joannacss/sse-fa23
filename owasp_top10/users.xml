@@ -1,0 +1,7 @@
+<users>
+	<user>
+		<uname>joepublic</uname>
+		<pwd>r3g</pwd>
+		<mail>joepublic@example1.com</mail>
+	</user>
+<user><uname>alice</uname><pwd>alicepassword</pwd><mail>alice@example3.com&lt;/mail&gt;&lt;/user&gt;&lt;user&gt;&lt;uname&gt;Hacker&lt;/uname&gt;&lt;pwd&gt;123&lt;/pwd&gt;&lt;mail&gt;hacker@exmaple_evil.net&lt;/mail&gt;</mail></user><user><uname>alice</uname><pwd>alicepassword</pwd><mail>alice@example3.com&lt;/mail&gt;&lt;/user&gt;&lt;user&gt;&lt;uname&gt;Hacker&lt;/uname&gt;&lt;pwd&gt;123&lt;/pwd&gt;&lt;mail&gt;hacker@exmaple_evil.net&lt;/mail&gt;</mail></user></users>
