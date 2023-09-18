@@ -11,7 +11,6 @@ def index(request):
     return render(request, 'blog/index.html', context)
 
 
-# /blog/register
 def register(request):
     pass
 

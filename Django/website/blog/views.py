@@ -15,15 +15,36 @@ def index(request):
 
 
 # https://stackoverflow.com/a/43793754
+# def login(request):
+#     errors = None
+#     if request.POST:
+#         # Create a model instance and populate it with data from the request
+#         uname = request.POST["username"]
+#         pwd = request.POST["password"]
+#         user = User.objects.filter(username=uname)
+#
+#         if len(user) > 0 and check_password(pwd, user[0].password):
+#             # create a new session
+#             request.session["user"] = uname
+#             return HttpResponseRedirect(reverse('blog:list_posts'))
+#         else:
+#             errors = [('authentication', "Login error")]
+#
+#     return render(request, 'blog/login.html', {'errors': errors})
+
+# this version has SQL Injection
+# to exploit:
+# username: ' OR 1=1; --
+# password: anything
 def login(request):
     errors = None
     if request.POST:
         # Create a model instance and populate it with data from the request
         uname = request.POST["username"]
         pwd = request.POST["password"]
-        user = User.objects.filter(username=uname)
-
-        if len(user) > 0 and check_password(pwd, user[0].password):
+        hashed_password = make_password(pwd)
+        user = User.objects.raw(f"SELECT * FROM blog_user WHERE username='{uname}' AND password='{hashed_password}'")
+        if len(user) > 0:
             # create a new session
             request.session["user"] = uname
             return HttpResponseRedirect(reverse('blog:list_posts'))
@@ -31,6 +52,7 @@ def login(request):
             errors = [('authentication', "Login error")]
 
     return render(request, 'blog/login.html', {'errors': errors})
+
 
 
 def logout(request):
