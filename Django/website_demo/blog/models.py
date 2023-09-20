@@ -30,6 +30,6 @@ class User(models.Model):
 
 # TODO: Post class
 class Post(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=400)
     content = models.TextField()
