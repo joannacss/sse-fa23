@@ -21,7 +21,7 @@ import java.util.jar.JarFile;
  *
  * @author Joanna C. S. Santos
  */
-public class LiveExampleL14 {
+public class ExampleL14 {
 
     private static void printCallGraph(CallGraph cg, String callgraphName) {
         System.out.println("================ " + callgraphName + " call graph ===================");
@@ -45,26 +45,51 @@ public class LiveExampleL14 {
     public static void main(String[] args) throws Exception {
 
         // TODO: create the analysis scope
-
+        AnalysisScope scope = AnalysisScope.createJavaAnalysisScope();
+        String jarFilePath = ExampleL14.class.getResource("Example1.jar").getPath();
+        scope.addToScope(ClassLoaderReference.Application, new JarFile(jarFilePath));
+        String jrePath = ExampleL14.class.getResource("jdk-17.0.1/rt.jar").getPath();
+        scope.addToScope(ClassLoaderReference.Primordial, new JarFile(jrePath));
+        String exFilePath = ExampleL14.class.getResource("Java60RegressionExclusions.txt").getPath();
+        scope.setExclusions(new FileOfClasses(new FileInputStream(exFilePath)));
 
         // TODO: create the class hierarchy
-
+        IClassHierarchy classHierarchy = ClassHierarchyFactory.make(scope);
 
         // TODO: print the number of classes in the class hierarchy
-
+        System.out.println("Number of classes: " + classHierarchy.getNumberOfClasses());
+        for (IClass iClass : classHierarchy) {
+            if (iClass.getClassLoader().getReference().equals(ClassLoaderReference.Application))
+                System.out.println(iClass.getName());
+        }
 
 
         // TODO: create the CHA call graph
-
+        CHACallGraph chaCallGraph = new CHACallGraph(classHierarchy, false);
+        Iterable<Entrypoint> entrypoints = Util.makeMainEntrypoints(scope, classHierarchy);
+        chaCallGraph.init(entrypoints);
+        printCallGraph(chaCallGraph, "CHA");
 
 
         // TODO: create the RTA call graph
-
+        AnalysisOptions options = new AnalysisOptions();
+        options.setEntrypoints(entrypoints);
+        CallGraphBuilder<InstanceKey> rtaBuilder = Util.makeRTABuilder(options, new AnalysisCacheImpl(), classHierarchy, scope);
+        CallGraph rtaCallGraph = rtaBuilder.makeCallGraph(options, null);
+        printCallGraph(rtaCallGraph, "RTA");
 
         // TODO: create the 1-CFA call graph
+        SSAPropagationCallGraphBuilder oneCfaBuilder = Util.makeNCFABuilder(1, options, new AnalysisCacheImpl(), classHierarchy, scope);
+        CallGraph oneCfaCallGraph = oneCfaBuilder.makeCallGraph(options, null);
+        printCallGraph(oneCfaCallGraph, "1-CFA");
 
 
         // TODO: print the IR of the main method
+        CGNode mainNode = oneCfaCallGraph.getEntrypointNodes().iterator().next();
+        IR ir = mainNode.getIR();
+        System.out.println(ir.toString());
 
+
+        new CFGVisualizer(mainNode, false).generateVisualGraph(new File("target/Example1-BB-not-pruned-cfg.dot"));
     }
 }

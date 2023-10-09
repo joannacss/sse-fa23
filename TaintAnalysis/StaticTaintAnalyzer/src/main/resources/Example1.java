@@ -4,7 +4,7 @@ public class Example1 {
     public static void main(String[] args) {
         Shape s;
         // is even?
-        if (Integer.parseInt(args[0]) % 2 == 0) {
+        if (args.length % 2 == 0) {
             s = new Circle();
         } else {
             s = new Rectangle();
