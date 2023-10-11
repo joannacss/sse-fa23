@@ -106,11 +106,10 @@ public class GraphVisualizer<T> {
         // prints nodes labels first
         for (T node : g) {
             if (nodeRemover == null || !nodeRemover.isIrrelevantNode(node)) {
-//                dotStringBuffer.append("\t\"").append(nodeLabeller.getLabel(node)).append("\"");
                 dotStringBuffer.append("\tN").append(nGraph.getNumber(node))
                         .append("[label=\"").append(nodeLabeller.getLabel(node)).append("\"");
-                dotStringBuffer.append(nodeHighliter != null ? "," + nodeHighliter.getAttributes(node).substring(1) : "");
-                dotStringBuffer.append(";\n");
+                dotStringBuffer.append(nodeHighliter != null ? "," + nodeHighliter.getAttributes(node) : "");
+                dotStringBuffer.append("];\n");
             }
         }
 
@@ -123,7 +122,6 @@ public class GraphVisualizer<T> {
                     numEdges = labeledG.getEdgeLabels(from, to).size();
                 }
                 for (int i = 0; i < numEdges; i++) {
-//                    dotStringBuffer.append(nodeRemover != null && (nodeRemover.isIrrelevantNode(from) || nodeRemover.isIrrelevantNode(to)) ? "//\t" : "\t");
                     if (nodeRemover == null || (!nodeRemover.isIrrelevantNode(from) && !nodeRemover.isIrrelevantNode(to))) {
                         dotStringBuffer.append("\tN").append(nGraph.getNumber(from));
                         dotStringBuffer.append(" -> ");
@@ -227,9 +225,9 @@ public class GraphVisualizer<T> {
         return (NodeHighlighter) n
                 -> ((CGNode) n).getMethod() instanceof SyntheticMethod ?
                 "[fillcolor=none,color=gray,shape=rectangle,style=dashed]" :
-                isPrimordialScope((CGNode) n) ? "[fillcolor=peachpuff,color=salmon2]" // primordial
-                        : (isApplicationScope((CGNode) n) ? "[fillcolor=palegreen,color=darkseagreen]" // application
-                        : "[fillcolor=grey93,color=grey33]" // extension
+                isPrimordialScope((CGNode) n) ? "fillcolor=peachpuff,color=salmon2" // primordial
+                        : (isApplicationScope((CGNode) n) ? "fillcolor=palegreen,color=darkseagreen" // application
+                        : "fillcolor=grey93,color=grey33" // extension
                 );
     }
 

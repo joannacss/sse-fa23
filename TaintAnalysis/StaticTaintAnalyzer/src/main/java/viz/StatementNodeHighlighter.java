@@ -18,7 +18,7 @@ public class StatementNodeHighlighter implements GraphVisualizer.NodeHighlighter
 
     @Override
     public String getAttributes(Statement s) {
-        return slice.contains(s) ? "[fillcolor=palegreen,color=darkseagreen]" : "[fillcolor=white,color=black]";
+        return slice.contains(s) ? "fillcolor=palegreen,color=darkseagreen" : "fillcolor=white,color=black";
 
     }
 }

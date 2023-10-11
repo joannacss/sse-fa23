@@ -23,7 +23,7 @@ import java.util.jar.JarFile;
  */
 public class ExampleL14 {
 
-    private static void printCallGraph(CallGraph cg, String callgraphName) {
+    public static void printCallGraph(CallGraph cg, String callgraphName) {
         System.out.println("================ " + callgraphName + " call graph ===================");
         System.out.println(CallGraphStats.getStats(cg));
         System.out.println("Call Graph (application scope only): ");
