@@ -2,6 +2,7 @@ import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.ipa.callgraph.*;
 import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
@@ -20,9 +21,11 @@ import com.ibm.wala.util.graph.traverse.BFSPathFinder;
 import com.ibm.wala.util.strings.Atom;
 import viz.*;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,21 +34,21 @@ import java.util.jar.JarFile;
 import static com.ibm.wala.types.TypeReference.findOrCreate;
 
 /**
- * Answer to the example coded in class - Lecture 15.
+ * Example coded in class - Lecture 15.
  * Walked through WALA's PDG, SDG data structures and how to compute slices.
  *
  * @author Joanna C. S. Santos
  */
-public class ExampleL15 {
+public class LiveExampleL15 {
 
     public static void main(String[] args) throws IOException, ClassHierarchyException, CancelException {
         //Create the analysis scope
         AnalysisScope scope = AnalysisScope.createJavaAnalysisScope();
-        String jarFilePath = ExampleL15.class.getResource("Example4.jar").getPath();
+        String jarFilePath = LiveExampleL15.class.getResource("Example4.jar").getPath();
         scope.addToScope(ClassLoaderReference.Application, new JarFile(jarFilePath));
-        String jrePath = ExampleL15.class.getResource("jdk-17.0.1/rt.jar").getPath();
+        String jrePath = LiveExampleL15.class.getResource("jdk-17.0.1/rt.jar").getPath();
         scope.addToScope(ClassLoaderReference.Primordial, new JarFile(jrePath));
-        String exFilePath = ExampleL15.class.getResource("Java60RegressionExclusions.txt").getPath();
+        String exFilePath = LiveExampleL15.class.getResource("Java60RegressionExclusions.txt").getPath();
         scope.setExclusions(new FileOfClasses(new FileInputStream(exFilePath)));
 
         // Create the class hierarchy
@@ -60,44 +63,34 @@ public class ExampleL15 {
         ExampleL14.printCallGraph(callGraph, "1-CFA");
 
 
-        // Get the IR of the main method
-        CGNode mainNode = callGraph.getEntrypointNodes().iterator().next();
-        IR ir = mainNode.getIR();
-        SSAInstruction[] instructions = ir.getInstructions();
-        SSACFG cfg = ir.getControlFlowGraph();
-
-
         // TODO: Compute the SDG of the program (data only)
-        SDG sdg = new SDG(callGraph, builder.getPointerAnalysis(), DataDependenceOptions.NO_BASE_NO_HEAP_NO_EXCEPTIONS, ControlDependenceOptions.NONE);
+        PointerAnalysis<InstanceKey> pointerAnalysis = builder.getPointerAnalysis();
+        SDG sdg = new SDG(callGraph, pointerAnalysis, DataDependenceOptions.NO_BASE_NO_HEAP_NO_EXCEPTIONS, ControlDependenceOptions.NO_EXCEPTIONAL_EDGES);
 
         // TODO: find sources and sinks
-        Set<Statement> sinks = findSinks(sdg);
         Set<Statement> sources = findSources(sdg);
+        Set<Statement> sinks = findSinks(sdg);
 
-        // TODO: slice the SDG
-        Set<Statement> slice = new HashSet<>(Slicer.computeBackwardSlice(sdg, sinks));
-        Graph<Statement> slicedSdg = GraphSlicer.prune(sdg, s -> slice.contains(s));
+        // TODO: slice the SDG and compute a pruned SDG
+        Collection<Statement> slice = Slicer.computeBackwardSlice(sdg, sinks);
+        Graph slicedSdg = GraphSlicer.prune(sdg, s -> slice.contains(s));
 
         // TODO: find vulnerable paths
         Set<List<Statement>> vulnerablePaths = getVulnerablePaths(slicedSdg, sources, sinks);
 
+
+
+
+
         // TODO: print vulnerable paths
-        for (List<Statement> path : vulnerablePaths) {
-            System.out.println("VULNERABLE PATH");
-            for (Statement s : path) {
-                System.out.println("\t" + s);
+
+        for (List<Statement> vulnerablePath : vulnerablePaths) {
+            System.out.println("Vulnerable path:");
+            for (Statement statement : vulnerablePath) {
+                System.out.println(statement);
             }
-            System.out.println("------------------------------");
         }
 
-
-        StatementNodeLabeller nodeLabeller = new StatementNodeLabeller(sdg);
-        StatementEdgeHighlighter edgeHighlighter = new StatementEdgeHighlighter(sdg);
-        StatementNodeHighlighter nodeHighlighter = new StatementNodeHighlighter(slice);
-        StatementNodeRemover nodeRemover = new StatementNodeRemover();
-
-        GraphVisualizer<Object> visualizer = new GraphVisualizer<>("SDG of main", nodeLabeller, nodeHighlighter, edgeHighlighter, nodeRemover);
-        visualizer.generateVisualGraph(sdg, new File("./target/Example4_main_sdg.dot"));
     }
 
 
