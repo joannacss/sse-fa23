@@ -31,11 +31,8 @@ def main():
 	# start tracing the invocation
 	sys.settrace(analyze)
 	output = triangle(2, 2, 1)
-
 	# stop tracing the invocation
 	sys.settrace(None)
-
-
 	print("Output at main()", output)
     
 
