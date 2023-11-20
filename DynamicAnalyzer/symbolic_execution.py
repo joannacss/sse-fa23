@@ -16,7 +16,6 @@ def collect_conditions(tree):
 			paths.append(context + [cond])
 
 	def traverse(node, context):
-		print(node.__class__.__name__)
 		# method call, loops, ...		
 		if isinstance(node, ast.If):
 			cond = ast.unparse(node.test).strip()
@@ -32,9 +31,8 @@ def collect_conditions(tree):
 	return paths
 
 
-
 def main():
-	function_source = inspect.getsource(triangle)
+	function_source = inspect.getsource(test)
 	function_ast = ast.parse(function_source)
 	paths = collect_conditions(function_ast)
 	
